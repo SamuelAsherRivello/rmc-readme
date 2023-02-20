@@ -26,7 +26,7 @@ namespace RMC.Core.ReadMe
 		[SerializeField] private GUIStyle TextBodyStyle;
 		[SerializeField] private GUIStyle LinkTextStyle;
 
-		private static bool _isInActiveDevelopment = true; //set false for production
+		private static bool _isInActiveDevelopment = false; //set false for production
 		private static bool _isInitialized = false;
 		private ReadMeEditor()
 		{
@@ -55,31 +55,35 @@ namespace RMC.Core.ReadMe
 			
 			//Declare Styles
 			TitleStyle = new GUIStyle(EditorStyles.label);
+			TitleStyle.stretchHeight = true;
 			TitleStyle.wordWrap = false;
 			TitleStyle.fontSize = 20;
 			TitleStyle.margin.left = 30;
 			TitleStyle.alignment = TextAnchor.MiddleLeft;
 			
+			//Icon
 			IconStyle = new GUIStyle(EditorStyles.iconButton);
 			IconStyle.alignment = TextAnchor.MiddleCenter;
 
-
+			//TextHeading
 			TextHeadingStyle = new GUIStyle(TitleStyle);
-			TitleStyle.wordWrap = true;
+			TextHeadingStyle.wordWrap = true;
 			TextHeadingStyle.fontSize = 20;
 			
+			//TextSubheadingStyle
 			TextSubheadingStyle = new GUIStyle(TextHeadingStyle);
 			TextSubheadingStyle.wordWrap = true;
 			TextSubheadingStyle.fontStyle = FontStyle.Bold;
 			TextSubheadingStyle.fontSize = 18;
 			
-			//Body supports richText (https://docs.unity3d.com/2021.3/Documentation/Manual/StyledText.html)
+			//TextBodyStyle - Supports richText (https://docs.unity3d.com/2021.3/Documentation/Manual/StyledText.html)
 			TextBodyStyle = new GUIStyle(TextHeadingStyle);
 			TextBodyStyle.wordWrap = true;
 			TextBodyStyle.richText = true;
 			TextBodyStyle.fontSize = 12;
 			TextBodyStyle.border = new RectOffset(0, 0, 0, 0);
 			
+			//LinkTextStyle
 			LinkTextStyle = new GUIStyle(EditorStyles.linkLabel);
 			LinkTextStyle.wordWrap = false;
 			LinkTextStyle.stretchWidth = false;
@@ -120,7 +124,7 @@ namespace RMC.Core.ReadMe
 			var iconWidth = Mathf.Min(EditorGUIUtility.currentViewWidth / 3f - 20f, 100);
 			iconWidth = Mathf.Max(iconWidth, 50);
 			
-			GUILayout.BeginHorizontal("");
+			GUILayout.BeginHorizontal();
 			{
 				IconStyle.fixedWidth = iconWidth;
 				IconStyle.fixedHeight = iconWidth;
@@ -153,7 +157,6 @@ namespace RMC.Core.ReadMe
 			Initialize();
 
 			var MinWidth = Mathf.Clamp(EditorGUIUtility.currentViewWidth, LayoutMinWidht, LayoutMaxWidth);
-			Debug.Log(MinWidth);
 
 			if (readMe != null && readMe.Sections != null)
 			{
