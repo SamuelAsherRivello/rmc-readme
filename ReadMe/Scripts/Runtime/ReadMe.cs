@@ -4,8 +4,6 @@ using UnityEngine.Serialization;
 
 namespace RMC.Core.ReadMe
 {
-    
-
     /// <summary>
     /// Custom-formatted ReadMe file with markdown-like display. 
     /// 
@@ -32,7 +30,7 @@ namespace RMC.Core.ReadMe
             //Here are TEMPORARY defaults. Set to any value (or "") in the INSPECTOR as desired.
             public string TextHeading = "Text Heading";
             public string TextSubheading = "Text Subheading";
-            public string TextBody = "Text Body";
+            public string TextBody = "Text Body which supports rich text including <b>bold</b>, line\nbreaks, <i>italics</i>, & <color='black'>colors</color>.";
             
             //Set LinkName to "" to disable
             public string LinkName = "Link Text";

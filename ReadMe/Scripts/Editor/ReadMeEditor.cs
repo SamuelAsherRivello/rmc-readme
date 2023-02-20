@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using UnityEngine.Serialization;
 
 namespace RMC.Core.ReadMe
 {
@@ -10,36 +11,154 @@ namespace RMC.Core.ReadMe
 	[InitializeOnLoad]
 	public class ReadMeEditor : UnityEditor.Editor
 	{
-		static float vSpaceAfterSection = 2f;
-		private static float vSpaceBeforeSection = 8;
-		static float hSpace1 = 8;
-		static float hSpace2 = 16;
-		
+		private static float VSpaceBeforeAllSections = 5;
+		private static float vSpaceAfterEachSection = 10f;
+		private static float hSpace1 = 8;
+		private static float hSpace2 = 16;
+		private static float hSpace3 = 25;
+		private static float LayoutMinWidht = 250; //Most, not all items
+		private static float LayoutMaxWidth = 400; //Most, not all items
 
+		[SerializeField] private GUIStyle TitleStyle;
+		[SerializeField] private GUIStyle IconStyle;
+		[SerializeField] private GUIStyle TextHeadingStyle;
+		[SerializeField] private GUIStyle TextSubheadingStyle;
+		[SerializeField] private GUIStyle TextBodyStyle;
+		[SerializeField] private GUIStyle LinkTextStyle;
+
+		private static bool _isInActiveDevelopment = true; //set false for production
+		private static bool _isInitialized = false;
+		private ReadMeEditor()
+		{
+			_isInitialized = false;
+		}
+		
+		private void Initialize()
+		{
+			if (_isInitialized)
+			{
+				return;
+			}
+
+			//In active development, comment this out to constantly
+			//refresh the style data
+			if (_isInActiveDevelopment)
+			{
+				Debug.Log("Initialize. TODO: Set IsInActiveDevelopment = false");
+			}
+			else
+			{
+				_isInitialized = true;
+			}
+			
+			
+			
+			//Declare Styles
+			TitleStyle = new GUIStyle(EditorStyles.label);
+			TitleStyle.wordWrap = false;
+			TitleStyle.fontSize = 20;
+			TitleStyle.margin.left = 30;
+			TitleStyle.alignment = TextAnchor.MiddleLeft;
+			
+			IconStyle = new GUIStyle(EditorStyles.iconButton);
+			IconStyle.alignment = TextAnchor.MiddleCenter;
+
+
+			TextHeadingStyle = new GUIStyle(TitleStyle);
+			TitleStyle.wordWrap = true;
+			TextHeadingStyle.fontSize = 20;
+			
+			TextSubheadingStyle = new GUIStyle(TextHeadingStyle);
+			TextSubheadingStyle.wordWrap = true;
+			TextSubheadingStyle.fontStyle = FontStyle.Bold;
+			TextSubheadingStyle.fontSize = 18;
+			
+			//Body supports richText (https://docs.unity3d.com/2021.3/Documentation/Manual/StyledText.html)
+			TextBodyStyle = new GUIStyle(TextHeadingStyle);
+			TextBodyStyle.wordWrap = true;
+			TextBodyStyle.richText = true;
+			TextBodyStyle.fontSize = 12;
+			TextBodyStyle.border = new RectOffset(0, 0, 0, 0);
+			
+			LinkTextStyle = new GUIStyle(EditorStyles.linkLabel);
+			LinkTextStyle.wordWrap = false;
+			LinkTextStyle.stretchWidth = false;
+		}
+
+		/// <summary>
+		/// All for "\n" in the source to be a line break in the result
+		/// </summary>
+		private string ProcessText(string s)
+		{
+			return s.Replace("\\n", "\n");
+		}
+		
+		/// <summary>
+		/// Format the links pretty
+		/// </summary>
+		private bool ProcessLink(GUIContent label, params GUILayoutOption[] options)
+		{
+			var position = GUILayoutUtility.GetRect(label, LinkTextStyle, options);
+
+			Handles.BeginGUI();
+			Handles.color = LinkTextStyle.normal.textColor;
+			Handles.DrawLine(new Vector3(position.xMin, position.yMax), new Vector3(position.xMax, position.yMax));
+			Handles.color = Color.white;
+			Handles.EndGUI();
+
+			EditorGUIUtility.AddCursorRect(position, MouseCursor.Link);
+
+			return GUI.Button(position, label, LinkTextStyle);
+		}
 		
 		protected override void OnHeaderGUI()
 		{
 			var readMe = (ReadMe)target;
-			Init();
+			
+			Initialize();
 
-			var iconWidth = Mathf.Min(EditorGUIUtility.currentViewWidth / 3f - 20f, 128f);
-
-			GUILayout.BeginHorizontal("In BigTitle");
+			var iconWidth = Mathf.Min(EditorGUIUtility.currentViewWidth / 3f - 20f, 100);
+			iconWidth = Mathf.Max(iconWidth, 50);
+			
+			GUILayout.BeginHorizontal("");
 			{
-				GUILayout.Label(readMe.Icon, GUILayout.Width(iconWidth), GUILayout.Height(iconWidth));
+				IconStyle.fixedWidth = iconWidth;
+				IconStyle.fixedHeight = iconWidth;
+				GUILayout.Box(readMe.Icon, IconStyle,
+					GUILayout.Height(iconWidth), GUILayout.Width(iconWidth));
 				GUILayout.Label(readMe.Title, TitleStyle);
 			}
+			
 			GUILayout.EndHorizontal();
+			GUIDividerLine();
+		}
+		
+		private void GUIDividerLine( int height = 1 )
+		{
+			Rect rect = EditorGUILayout.GetControlRect(false, height );
+			rect.height = height;
+			//Line
+			EditorGUI.DrawRect(rect, new Color ( 0.4f,0.4f,0.4f, .8f ) );
+			
+			//Dropshadow
+			rect.y +=2 ;
+			EditorGUI.DrawRect(rect, new Color ( 0.2f,0.2f,0.2f, .4f ) );
+
 		}
 
-      public override void OnInspectorGUI()
+		public override void OnInspectorGUI()
 		{
 			var readMe = (ReadMe)target;
 			
-			Init();
+			Initialize();
+
+			var MinWidth = Mathf.Clamp(EditorGUIUtility.currentViewWidth, LayoutMinWidht, LayoutMaxWidth);
+			Debug.Log(MinWidth);
 
 			if (readMe != null && readMe.Sections != null)
 			{
+				GUILayout.Space(VSpaceBeforeAllSections);
+				
 				foreach (var section in readMe.Sections)
 				{
 					if (section == null)
@@ -49,26 +168,30 @@ namespace RMC.Core.ReadMe
 
 					if (!string.IsNullOrEmpty(section.TextHeading))
 					{
-						GUILayout.Space(vSpaceBeforeSection);
-						GUILayout.Label(section.TextHeading, HeadingStyle);
+						GUILayout.Space(5);
+						GUILayout.BeginHorizontal(GUILayout.Width(MinWidth));
+						GUILayout.Space(hSpace1);
+						GUILayout.Label(section.TextHeading, TextHeadingStyle);
+						GUILayout.EndHorizontal();
 						GUILayout.Space(3);
 					}
 
 					if (!string.IsNullOrEmpty(section.TextSubheading))
 					{
 						GUILayout.Space(5);
-						GUILayout.BeginHorizontal();
-						GUILayout.Space(hSpace1);
-						GUILayout.Label(section.TextSubheading, SubheadingStyle);
+						GUILayout.BeginHorizontal(GUILayout.Width(MinWidth));
+						GUILayout.Space(hSpace2);
+						GUILayout.Label(section.TextSubheading, TextSubheadingStyle);
 						GUILayout.EndHorizontal();
 						GUILayout.Space(3);
 					}
 
 					if (!string.IsNullOrEmpty(section.TextBody))
 					{
-						GUILayout.BeginHorizontal();
-						GUILayout.Space(hSpace2);
-						GUILayout.Label(section.TextBody, BodyStyle);
+						
+						GUILayout.BeginHorizontal(GUILayout.Width(MinWidth));
+						GUILayout.Space(hSpace3);
+						GUILayout.TextField(ProcessText(section.TextBody), TextBodyStyle);
 						GUILayout.EndHorizontal();
 						GUILayout.Space(3);
 					}
@@ -76,9 +199,9 @@ namespace RMC.Core.ReadMe
 					if (!string.IsNullOrEmpty(section.LinkName))
 					{
 						GUILayout.BeginHorizontal();
-						GUILayout.Space(hSpace2);
+						GUILayout.Space(hSpace3);
 						GUILayout.Label("▶");
-						if (LinkLabel(new GUIContent(section.LinkName)))
+						if (ProcessLink(new GUIContent(section.LinkName)))
 						{
 							Application.OpenURL(section.LinkUrl);
 						}
@@ -91,9 +214,9 @@ namespace RMC.Core.ReadMe
 					if (!string.IsNullOrEmpty(section.PingObjectName))
 					{
 						GUILayout.BeginHorizontal();
-						GUILayout.Space(hSpace2);
+						GUILayout.Space(hSpace3);
 						GUILayout.Label("▶");
-						if (LinkLabel(new GUIContent(section.PingObjectName)))
+						if (ProcessLink(new GUIContent(section.PingObjectName)))
 						{
 							string path = AssetDatabase.GUIDToAssetPath(section.PingObjectGuid);
 							var objectToSelect = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
@@ -111,9 +234,9 @@ namespace RMC.Core.ReadMe
 					if (!string.IsNullOrEmpty(section.MenuItemName))
 					{
 						GUILayout.BeginHorizontal();
-						GUILayout.Space(hSpace2);
+						GUILayout.Space(hSpace3);
 						GUILayout.Label("▶");
-						if (LinkLabel(new GUIContent(section.MenuItemName)))
+						if (ProcessLink(new GUIContent(section.MenuItemName)))
 						{
 							EditorApplication.ExecuteMenuItem(section.MenuItemPath);
 						}
@@ -122,71 +245,12 @@ namespace RMC.Core.ReadMe
 						GUILayout.EndHorizontal();
 					}
 
-					GUILayout.Space(vSpaceAfterSection);
+					GUILayout.Space(vSpaceAfterEachSection);
 				}
 			}
-		}
-
-
-		bool m_Initialized;
-
-		GUIStyle LinkStyle { get { return m_LinkStyle; } }
-		[SerializeField] GUIStyle m_LinkStyle;
-
-		GUIStyle TitleStyle { get { return m_TitleStyle; } }
-		[SerializeField] GUIStyle m_TitleStyle;
-
-		GUIStyle HeadingStyle { get { return m_HeadingStyle; } }
-		[SerializeField] GUIStyle m_HeadingStyle;
-
-		GUIStyle SubheadingStyle { get { return m_SubheadingStyle; } }
-		[SerializeField] GUIStyle m_SubheadingStyle;
-
-		GUIStyle BodyStyle { get { return m_BodyStyle; } }
-		[SerializeField] GUIStyle m_BodyStyle;
-
-		void Init()
-		{
-			if (m_Initialized)
-				return;
-			m_BodyStyle = new GUIStyle(EditorStyles.label);
-			m_BodyStyle.wordWrap = true;
-			m_BodyStyle.fontSize = 14;
 			
-			m_TitleStyle = new GUIStyle(m_BodyStyle);
-			m_TitleStyle.fontSize = 26;
-			m_TitleStyle.margin.top = 25;
-
-			m_HeadingStyle = new GUIStyle(m_BodyStyle);
-			m_HeadingStyle.fontSize = 18;
 			
-			m_SubheadingStyle = new GUIStyle(m_BodyStyle);
-			m_SubheadingStyle.fontStyle = FontStyle.Bold;
-			m_SubheadingStyle.fontSize = 12;
 			
-			m_LinkStyle = new GUIStyle(m_BodyStyle);
-			m_LinkStyle.wordWrap = false;
-			// Match selection color which works nicely for both light and dark skins
-			m_LinkStyle.normal.textColor = new Color(0x00 / 255f, 0xC3 / 255f, 0xF8 / 255f, 0xFF);
-			m_LinkStyle.stretchWidth = false;
-
-			m_Initialized = true;
 		}
-
-		bool LinkLabel(GUIContent label, params GUILayoutOption[] options)
-		{
-			var position = GUILayoutUtility.GetRect(label, LinkStyle, options);
-
-			Handles.BeginGUI();
-			Handles.color = LinkStyle.normal.textColor;
-			Handles.DrawLine(new Vector3(position.xMin, position.yMax), new Vector3(position.xMax, position.yMax));
-			Handles.color = Color.white;
-			Handles.EndGUI();
-
-			EditorGUIUtility.AddCursorRect(position, MouseCursor.Link);
-
-			return GUI.Button(position, label, LinkStyle);
-		}
-
 	}
 }
