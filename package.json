@@ -14,7 +14,7 @@
   ],
   "homepage": "https://github.com/rmc/rmc-readme.git",
   "bugs": {
-    "url": "https://github.com/rmc/rmc-readme/issues"
+     "url": "https://github.com/rmc/rmc-readme/issues"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,6 @@
   "license": "MIT",
   "author": "RMC (github.com/SamuelAsherRivello)",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+      "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
