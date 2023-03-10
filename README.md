@@ -1,6 +1,11 @@
+[![npm package](https://img.shields.io/npm/v/com.rmc.rmc-readme)](https://www.npmjs.com/package/com.rmc.rmc-readme)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 # RMC ReadMe
 
-The readme library for Unity
+The readme library for Unity for RUNTIME usage. The end-user only needs this package.
+
+If you also want to AUTHOR the experience, see https://github.com/SamuelAsherRivello/rmc-readme-authoring.
 
 
 # Table Of Contents
