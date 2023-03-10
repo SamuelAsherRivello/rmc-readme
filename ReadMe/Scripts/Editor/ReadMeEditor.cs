@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using UnityEngine.Serialization;
 
 namespace RMC.Core.ReadMe
 {
@@ -56,13 +55,17 @@ namespace RMC.Core.ReadMe
 			//Declare Styles
 			TitleStyle = new GUIStyle(EditorStyles.label);
 			TitleStyle.stretchHeight = true;
-			TitleStyle.wordWrap = false;
+			TitleStyle.wordWrap = true;
 			TitleStyle.fontSize = 20;
-			TitleStyle.margin.left = 30;
+			TitleStyle.margin.left = 10;
 			TitleStyle.alignment = TextAnchor.MiddleLeft;
 			
 			//Icon
 			IconStyle = new GUIStyle(EditorStyles.iconButton);
+			IconStyle.normal.background = null;
+			IconStyle.hover.background = null;
+			IconStyle.active.background = null;
+			IconStyle.margin = new RectOffset(5, 5, 5, 5);
 			IconStyle.alignment = TextAnchor.MiddleCenter;
 
 			//TextHeading
@@ -121,16 +124,20 @@ namespace RMC.Core.ReadMe
 			
 			Initialize();
 
+		
 			var iconWidth = Mathf.Min(EditorGUIUtility.currentViewWidth / 3f - 20f, 100);
-			iconWidth = Mathf.Max(iconWidth, 50);
+			var labelWidth = EditorGUIUtility.currentViewWidth - iconWidth;
+			var labelMinWidth = 200;
+			var headerHeight = 85;
+			iconWidth = 80;
 			
-			GUILayout.BeginHorizontal();
+			GUILayout.BeginHorizontal(GUILayout.MaxHeight(headerHeight));
 			{
 				IconStyle.fixedWidth = iconWidth;
 				IconStyle.fixedHeight = iconWidth;
-				GUILayout.Box(readMe.Icon, IconStyle,
-					GUILayout.Height(iconWidth), GUILayout.Width(iconWidth));
-				GUILayout.Label(readMe.Title, TitleStyle);
+				GUILayout.Box(readMe.Icon, IconStyle);
+				GUILayout.Label(ProcessText(readMe.Title), TitleStyle, 
+					GUILayout.MaxWidth(labelWidth), GUILayout.MinWidth(labelMinWidth));
 			}
 			
 			GUILayout.EndHorizontal();
