@@ -18,7 +18,7 @@
 
 ## How to use
 
-This is a custom library to **display** a custom ReadMe for the Unity Inspector Window
+This is a custom library to **display** a custom ReadMe for the Unity Inspector Window.
 
 If you also want to **author** a custom ReadMe, see the https://github.com/SamuelAsherRivello/rmc-readme-authoring.
 
